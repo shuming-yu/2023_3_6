@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
+
+  <body>
+    <a href="/01. async-await-intro.html">01. async-await-intro</a>
+    <a href="/02. axios-and-async.html">02. axios-and-async</a>
+    <a href="/03. catchError.html">03. catchError</a>
+
+    <h1>使用 Async Function 改寫實戰範例</h1>
+
+    <script>
+      function promiseFn(num, time = 500) {
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (num) {
+              resolve(`成功 ${num}`);
+            } else {
+              reject('失敗');
+            }
+          }, time);
+        });
+      }
+
+      // 測試加上 async - await 逐行執行
+      function sample_promiseRace(){
+        Promise.race([
+          promiseFn(1, 500),  // (0,500) Falsy 也不會影響回傳結果
+          promiseFn(2, 300),  // 回傳第一個完成結果
+          promiseFn(3, 2000)
+        ])
+          .then(res => {
+            console.log("res:", res)
+          })
+          .catch(rej => {
+            console.log("rej:", rej);
+          })
+      }
+
+
+      // https://jsonplaceholder.typicode.com/todos/2
+
+      // 1.
+      function sample_axios(){
+        axios
+          .get('https://jsonplaceholder.typicode.com/todos/2')
+          .then((res) => {
+            console.log("res:", res);
+          })
+          .catch((err) => {
+            console.log("err", err);
+          });
+      }
+      
+
+      // 2.
+      function sample_promiseAll(){
+        Promise.all([
+          axios.get('https://jsonplaceholder.typicode.com/todos/1'),
+          axios.get('https://jsonplaceholder.typicode.com/todos/2')
+        ])
+          .then(res => {
+            console.log(res);
+          })
+          .catch((err) => {
+            console.log("err", err);
+          });
+      }
+
+      function sample_getData(){
+        // 3. 傳統函式
+        // async function getData() {
+        //   try {
+        //     const res = await Promise.all([
+        //       axios.get('https://jsonplaceholder.typicode.com/todos/1'),
+        //       axios.get('https://jsonplaceholder.typicode.com/todos/2')
+        //     ]);
+        //     return res;
+        //   }
+        //   catch (error) {
+        //       throw new Error(error);
+        //     }
+        // }
+  
+        // 4. 箭頭函式
+        const getData = async () => {
+          try {
+            const res = await Promise.all([
+              axios.get('https://jsonplaceholder.typicode.com/todos/1'),
+              axios.get('https://jsonplaceholder.typicode.com/todos/2')
+            ])
+            // console.log("res:", res);
+            return res;
+          }
+          catch (error) {
+            // console.log('error:', error);
+            throw new Error(error);
+          }
+        }
+        // 1.
+        console.log(getData());
+        getData();
+
+  
+        // 2.
+        // getData().then(res => {
+        //   console.log("res:", res);
+        // })
+  
+        // 3.
+        // (async () => {
+        //   const res = getData(); // 查看結果 - Promise
+        //   // const res = await getData();
+        //   console.log("res:", res);
+        // })();
+      }
+    </script>
+  </body>
+</html>
